@@ -19,3 +19,5 @@ data/silver/*.parquet
 data/gold/*.parquet
 
 node_modules/
+
+.local-dev/
