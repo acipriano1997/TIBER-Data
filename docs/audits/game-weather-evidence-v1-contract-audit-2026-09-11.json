@@ -1,0 +1,42 @@
+{
+  "audit_id": "game-weather-evidence-v1-contract-audit-2026-09-11",
+  "date": "2026-09-11",
+  "task_class": ["contract_task", "downstream_handoff_task"],
+  "scope": {
+    "authorized": [
+      "contract definition",
+      "deterministic fixture validation",
+      "provenance semantics",
+      "point-in-time eligibility semantics",
+      "contract documentation"
+    ],
+    "not_authorized": [
+      "external weather ingestion",
+      "external dataset mirroring",
+      "live provider adapters",
+      "historical backfill",
+      "source-backed promotion",
+      "fantasy impact modeling",
+      "provider reconciliation weighting",
+      "lineup recommendation logic"
+    ]
+  },
+  "checks": [
+    {"id": "temporal_eligibility", "status": "pass"},
+    {"id": "source_disagreement_preserved", "status": "pass"},
+    {"id": "missing_evidence_fail_closed", "status": "pass"},
+    {"id": "roof_state_not_inferred", "status": "pass"},
+    {"id": "field_geometry_separate_from_model_impact", "status": "pass"},
+    {"id": "units_and_bounds_explicit", "status": "pass"},
+    {"id": "fixtures_do_not_claim_live_truth", "status": "pass"},
+    {"id": "contract_does_not_authorize_external_sources", "status": "pass"}
+  ],
+  "follow_up_risks": [
+    "venue metadata needs effective-period temporalization before historical production replay",
+    "each provider lane needs a raw trace retention policy",
+    "future adapters must preserve provider-native timestamp precision/offsets before normalization",
+    "future deterministic builder must verify field-relative wind decomposition numerically",
+    "roof evidence needs a first-hand source authority/conflict policy"
+  ],
+  "verdict": "pass_contract_foundation_not_authorized_for_live_ingestion_or_promotion"
+}
