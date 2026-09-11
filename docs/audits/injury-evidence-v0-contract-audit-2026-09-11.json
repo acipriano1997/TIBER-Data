@@ -1,0 +1,20 @@
+{
+  "audit_id": "injury-evidence-v0-contract-audit-2026-09-11",
+  "date": "2026-09-11",
+  "contract": "injury-evidence-v0",
+  "task_classes": ["contract", "downstream_handoff"],
+  "checks": {
+    "repository_boundary": "pass",
+    "fabricated_source_coverage": "pass",
+    "temporal_provenance": "pass",
+    "unknown_semantics": "pass",
+    "anti_recursion": "pass",
+    "video_medical_boundary": "pass",
+    "live_provider_admission": "hold",
+    "source_quality_calibration": "hold"
+  },
+  "production_claim": "none",
+  "live_source_coverage_claim": "none",
+  "promotion_status": "not_promoted",
+  "conclusion": "contract_safe_for_review_live_evidence_not_claimed"
+}
