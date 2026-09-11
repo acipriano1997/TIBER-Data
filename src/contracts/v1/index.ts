@@ -8,3 +8,4 @@ export * from './nflDraftResults.js';
 export * from './teamWeekRawV0.js';
 export * from './pointPredictionScenarioExport.js';
 export * from './rbContactEvasionObservationsV0.js';
+export * from './gameWeatherEvidence.js';
