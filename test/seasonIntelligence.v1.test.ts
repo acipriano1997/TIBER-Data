@@ -110,8 +110,9 @@ describe('Season Intelligence v1', () => {
     expect(seasonIntelligenceSnapshotSchema.safeParse(duplicateFiles).success).toBe(false);
   });
 
-  it('keeps evidence status independent from downstream model treatment', () => {
-    const { events } = loadPack();
+  it('keeps fact status, evidence confidence, and model treatment separate without pseudo-probabilities', () => {
+    const { events, delta } = loadPack();
+    const allEvents = [...events, ...delta.events];
     const statuses = new Set(events.map((event: any) => event.fact_status));
     const treatments = new Set(events.map((event: any) => event.model_treatment));
 
@@ -120,6 +121,11 @@ describe('Season Intelligence v1', () => {
     }
     for (const expected of ['IMMEDIATE_UPDATE', 'PARTIAL_UPDATE', 'WATCH_ONLY', 'CONTEXT_ONLY']) {
       expect(treatments.has(expected)).toBe(true);
+    }
+    for (const event of allEvents) {
+      expect(['HIGH', 'MEDIUM', 'LOW']).toContain(event.confidence_tier);
+      expect(event).not.toHaveProperty('confidence');
+      expect(event.fantasy_impact.time_horizon).not.toBe('WEEK_2');
     }
   });
 });
