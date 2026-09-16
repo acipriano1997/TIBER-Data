@@ -14,6 +14,8 @@ export const seasonIntelligenceFactStatusSchema = z.enum([
   'SPECULATIVE',
 ]);
 
+export const seasonIntelligenceConfidenceTierSchema = z.enum(['HIGH', 'MEDIUM', 'LOW']);
+
 export const seasonIntelligenceModelTreatmentSchema = z.enum([
   'IMMEDIATE_UPDATE',
   'PARTIAL_UPDATE',
@@ -85,11 +87,11 @@ export const seasonIntelligenceEventSchema = z.object({
     retrieved_at: isoDatetimeSchema,
     quality: z.enum(['HIGH', 'MEDIUM', 'LOW']),
   }).strict()).min(1),
-  confidence: z.number().min(0).max(1),
+  confidence_tier: seasonIntelligenceConfidenceTierSchema,
   fantasy_impact: z.object({
     direction: z.enum(['UP', 'DOWN', 'MIXED', 'NEUTRAL']),
     magnitude: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
-    time_horizon: z.enum(['WEEK_2', 'SHORT_TERM', 'REST_OF_SEASON', 'MULTI_YEAR', 'UNKNOWN']),
+    time_horizon: z.enum(['NEXT_WEEK', 'SHORT_TERM', 'REST_OF_SEASON', 'MULTI_YEAR', 'UNKNOWN']),
     uncertainty: z.enum(['LOW', 'MEDIUM', 'HIGH']),
     role_fragility: z.enum(['LOW', 'MEDIUM', 'HIGH', 'NOT_APPLICABLE']),
     affected_entities: z.array(z.string().min(1)),
