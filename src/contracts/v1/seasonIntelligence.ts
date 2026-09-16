@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 const isoDatetimeSchema = z.string().datetime({ offset: true });
 
-const uniqueStringArray = <T extends z.ZodTypeAny>(itemSchema: T) =>
-  z.array(itemSchema).refine((items) => new Set(items).size === items.length, {
+const uniqueNonEmptyArray = <T extends z.ZodTypeAny>(itemSchema: T) =>
+  z.array(itemSchema).min(1).refine((items) => new Set(items).size === items.length, {
     message: 'array items must be unique',
   });
 
@@ -69,7 +69,7 @@ export const seasonIntelligenceEventSchema = z.object({
   ]),
   fact_status: seasonIntelligenceFactStatusSchema,
   summary: z.string().min(1),
-  mechanisms: uniqueStringArray(seasonIntelligenceMechanismSchema).min(1),
+  mechanisms: uniqueNonEmptyArray(seasonIntelligenceMechanismSchema),
   sources: z.array(z.object({
     source_name: z.string().min(1),
     source_role: z.enum([
@@ -116,7 +116,7 @@ export const seasonIntelligenceSnapshotSchema = z.object({
   }).strict()).min(1),
   fingerprint_algorithm: z.literal('sha256-canonical-json'),
   fingerprint_sha256: z.string().regex(/^[a-f0-9]{64}$/),
-  event_files: uniqueStringArray(z.string().regex(/^events-\d{2}\.json$/)).min(1),
+  event_files: uniqueNonEmptyArray(z.string().regex(/^events-\d{2}\.json$/)),
   event_count: z.number().int().min(1),
 }).strict();
 
