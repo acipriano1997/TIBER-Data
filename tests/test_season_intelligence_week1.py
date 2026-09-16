@@ -74,14 +74,16 @@ def test_week1_season_intelligence_pack_contract_and_freeze_semantics():
     assert _canonical_fingerprint(manifest, events) == manifest["fingerprint_sha256"]
 
 
-def test_week1_pack_keeps_fact_status_separate_from_model_treatment():
+def test_week1_pack_keeps_evidence_axes_explicit_and_non_probabilistic():
     manifest = _load(PACK / "frozen-snapshot.json")
+    delta = _load(PACK / "deltas" / "2026-09-15.json")
     events = []
     for shard_name in manifest["event_files"]:
         events.extend(_load(PACK / shard_name))
+    all_events = events + delta["events"]
 
-    # A reported or observed item may still be actionable, but the two axes
-    # must remain independent and explicit.
+    # Fact status, ordinal evidence confidence, and model treatment are separate
+    # axes. Numeric pseudo-probabilities are intentionally not part of v1.
     assert {event["fact_status"] for event in events} >= {"CONFIRMED", "REPORTED", "OBSERVED"}
     assert {event["model_treatment"] for event in events} >= {
         "IMMEDIATE_UPDATE",
@@ -89,3 +91,6 @@ def test_week1_pack_keeps_fact_status_separate_from_model_treatment():
         "WATCH_ONLY",
         "CONTEXT_ONLY",
     }
+    assert all(event["confidence_tier"] in {"HIGH", "MEDIUM", "LOW"} for event in all_events)
+    assert all("confidence" not in event for event in all_events)
+    assert all(event["fantasy_impact"]["time_horizon"] != "WEEK_2" for event in all_events)
