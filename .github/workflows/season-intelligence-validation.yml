@@ -1,0 +1,57 @@
+name: Season Intelligence validation
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/season-intelligence-*.json'
+      - 'data/season_intelligence/**'
+      - 'src/contracts/v1/seasonIntelligence.ts'
+      - 'src/contracts/v1/index.ts'
+      - 'test/seasonIntelligence.v1.test.ts'
+      - 'tests/test_season_intelligence_week1.py'
+      - 'docs/season-intelligence-event-v1.md'
+      - '.github/workflows/season-intelligence-validation.yml'
+  push:
+    branches:
+      - feat/season-intelligence-event-v1
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Typecheck repository
+        run: npm run typecheck
+
+      - name: Run Vitest suite
+        run: npm test
+
+      - name: Build TypeScript package
+        run: npm run build
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install focused Python validation dependencies
+        run: python -m pip install --disable-pip-version-check pytest jsonschema
+
+      - name: Validate Week 1 frozen pack
+        run: python -m pytest -q tests/test_season_intelligence_week1.py
