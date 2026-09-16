@@ -2,6 +2,11 @@ import { z } from 'zod';
 
 const isoDatetimeSchema = z.string().datetime({ offset: true });
 
+const uniqueStringArray = <T extends z.ZodTypeAny>(itemSchema: T) =>
+  z.array(itemSchema).refine((items) => new Set(items).size === items.length, {
+    message: 'array items must be unique',
+  });
+
 export const seasonIntelligenceFactStatusSchema = z.enum([
   'CONFIRMED',
   'REPORTED',
@@ -17,19 +22,38 @@ export const seasonIntelligenceModelTreatmentSchema = z.enum([
   'NO_MODEL_WEIGHT',
 ]);
 
+const seasonIntelligenceMechanismSchema = z.enum([
+  'snap_share',
+  'route_share',
+  'target_share',
+  'carry_share',
+  'goal_line_role',
+  'personnel',
+  'qb_change',
+  'injury_recurring',
+  'protection',
+  'coaching',
+  'availability',
+  'volume',
+  'turnover_context',
+  'replacement_competence',
+  'defensive_matchup',
+  'other',
+]);
+
 export const seasonIntelligenceEventSchema = z.object({
   event_id: z.string().regex(/^sie-\d{4}-w\d{2}-[a-z0-9-]+$/),
   schema_version: z.literal('season-intelligence-event.v1'),
   season: z.number().int().min(1900),
   week: z.number().int().min(1).max(22),
-  occurred_at: isoDatetimeSchema.nullable(),
+  occurred_at: isoDatetimeSchema.nullable().optional(),
   known_at: isoDatetimeSchema,
   subject: z.object({
     entity_type: z.enum(['player', 'team', 'position_group', 'coach', 'game', 'league']),
     display_name: z.string().min(1),
     team: z.string().min(2).nullable(),
-    canonical_id: z.string().nullable(),
-  }),
+    canonical_id: z.string().nullable().optional(),
+  }).strict(),
   event_type: z.enum([
     'injury',
     'readiness',
@@ -45,24 +69,7 @@ export const seasonIntelligenceEventSchema = z.object({
   ]),
   fact_status: seasonIntelligenceFactStatusSchema,
   summary: z.string().min(1),
-  mechanisms: z.array(z.enum([
-    'snap_share',
-    'route_share',
-    'target_share',
-    'carry_share',
-    'goal_line_role',
-    'personnel',
-    'qb_change',
-    'injury_recurring',
-    'protection',
-    'coaching',
-    'availability',
-    'volume',
-    'turnover_context',
-    'replacement_competence',
-    'defensive_matchup',
-    'other',
-  ])).min(1),
+  mechanisms: uniqueStringArray(seasonIntelligenceMechanismSchema).min(1),
   sources: z.array(z.object({
     source_name: z.string().min(1),
     source_role: z.enum([
@@ -77,7 +84,7 @@ export const seasonIntelligenceEventSchema = z.object({
     published_at: isoDatetimeSchema.nullable(),
     retrieved_at: isoDatetimeSchema,
     quality: z.enum(['HIGH', 'MEDIUM', 'LOW']),
-  })).min(1),
+  }).strict()).min(1),
   confidence: z.number().min(0).max(1),
   fantasy_impact: z.object({
     direction: z.enum(['UP', 'DOWN', 'MIXED', 'NEUTRAL']),
@@ -86,12 +93,12 @@ export const seasonIntelligenceEventSchema = z.object({
     uncertainty: z.enum(['LOW', 'MEDIUM', 'HIGH']),
     role_fragility: z.enum(['LOW', 'MEDIUM', 'HIGH', 'NOT_APPLICABLE']),
     affected_entities: z.array(z.string().min(1)),
-  }),
+  }).strict(),
   model_treatment: seasonIntelligenceModelTreatmentSchema,
   next_required_evidence: z.array(z.string().min(1)),
   recheck_after: isoDatetimeSchema.nullable(),
-  supersedes_event_id: z.string().nullable(),
-  notes: z.array(z.string().min(1)),
+  supersedes_event_id: z.string().nullable().optional(),
+  notes: z.array(z.string().min(1)).optional(),
 }).strict();
 
 export const seasonIntelligenceSnapshotSchema = z.object({
@@ -109,7 +116,7 @@ export const seasonIntelligenceSnapshotSchema = z.object({
   }).strict()).min(1),
   fingerprint_algorithm: z.literal('sha256-canonical-json'),
   fingerprint_sha256: z.string().regex(/^[a-f0-9]{64}$/),
-  event_files: z.array(z.string().regex(/^events-\d{2}\.json$/)).min(1),
+  event_files: uniqueStringArray(z.string().regex(/^events-\d{2}\.json$/)).min(1),
   event_count: z.number().int().min(1),
 }).strict();
 
